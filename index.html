@@ -3,9 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnergyClicker - Кликер бот</title>
+    <title>EnergyMusic - Площадка для музыкантов</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Добавляем Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
     <style>
+        :root {
+            --primary: #00ff88;
+            --primary-dark: #00cc6a;
+            --bg-dark: #0a0a0a;
+            --bg-card: #111111;
+            --text: #ffffff;
+            --text-secondary: #aaaaaa;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,21 +27,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        :root {
-            --primary-dark: #0a0a0a;
-            --secondary-dark: #121212;
-            --accent-green: #00ff88;
-            --accent-light: #80ffc0;
-            --text-light: #f0f0f0;
-            --card-bg: rgba(18, 18, 18, 0.8);
-        }
-
         body {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #0d1f0d 100%);
-            color: var(--text-light);
+            background-color: var(--bg-dark);
+            color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
-            display: block;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
         }
 
         .container {
@@ -36,227 +47,411 @@
             padding: 0 20px;
         }
 
-        /* Header Styles */
+        /* Header */
         header {
-            padding: 2rem 0;
-            position: relative;
-            overflow: hidden;
+            background-color: rgba(10, 10, 10, 0.9);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
         }
 
-        .logo-container {
+        .header-content {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            animation: fadeInDown 1s ease;
         }
 
         .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-light));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-            animation: pulse 2s infinite;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
         }
 
         .logo i {
-            font-size: 2.5rem;
-            color: var(--primary-dark);
+            margin-right: 8px;
         }
 
-        .logo-text {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(to right, var(--accent-green), var(--accent-light));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        nav ul {
+            display: flex;
+            list-style: none;
         }
 
-        .subtitle {
-            text-align: center;
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            color: var(--accent-light);
-            animation: fadeIn 1.5s ease;
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .auth-buttons button {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .auth-buttons button:hover {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px var(--primary);
         }
 
         /* Hero Section */
         .hero {
             text-align: center;
-            padding: 3rem 0;
-            position: relative;
+            padding: 80px 0;
+            background: linear-gradient(to bottom, rgba(10, 10, 10, 0.8), rgba(10, 10, 10, 0.9));
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to right, var(--accent-green), var(--accent-light));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: fadeInUp 1s ease;
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px var(--primary);
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 18px;
             max-width: 700px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-            color: #cccccc;
-            animation: fadeInUp 1.2s ease;
+            margin: 0 auto 30px;
+            color: var(--text-secondary);
         }
 
-        /* Features Grid */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
+        .cta-button {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        .feature-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 2rem;
+        .cta-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px var(--primary);
+        }
+
+        /* Music Section */
+        .music-section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            font-size: 32px;
+            margin-bottom: 30px;
             text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(0, 255, 136, 0.1);
-            animation: fadeIn 1s ease;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        .upload-form {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .upload-form h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: var(--text);
+        }
+
+        .upload-button {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .upload-button:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .music-card {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
             border-color: rgba(0, 255, 136, 0.3);
         }
 
-        .feature-icon {
-            font-size: 3rem;
-            color: var(--accent-green);
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--accent-light);
-        }
-
-        .feature-card p {
-            color: #aaaaaa;
-            line-height: 1.6;
-        }
-
-        /* Buttons */
-        .buttons {
+        .music-cover {
+            height: 180px;
+            background-color: #222;
             display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 3rem 0;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
+            font-size: 48px;
+            color: var(--primary);
+        }
+
+        .music-info {
+            padding: 15px;
+        }
+
+        .music-title {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .music-artist {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .music-uploader {
+            color: var(--primary);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .music-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .play-button {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-button:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .like-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .like-button.liked {
+            color: var(--primary);
+        }
+
+        .like-button:hover {
+            color: var(--primary);
+        }
+
+        .likes-count {
+            margin-left: 5px;
+            font-size: 14px;
+        }
+
+        /* Audio Player */
+        .audio-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(10, 10, 10, 0.95);
+            padding: 15px 20px;
+            border-top: 1px solid var(--primary);
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 -5px 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .player-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .player-cover {
+            width: 50px;
+            height: 50px;
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            margin-right: 15px;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .player-text h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .player-text p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .player-controls button {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .player-controls button:hover {
+            color: var(--primary);
+        }
+
+        .play-pause-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-pause-btn:hover {
+            background-color: var(--primary-dark);
+            color: var(--bg-dark);
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: #333;
+            border-radius: 5px;
             overflow: hidden;
-            min-width: 200px;
-        }
-
-        .btn-telegram {
-            background: linear-gradient(135deg, var(--accent-green), #0088cc);
-            color: var(--primary-dark);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
-        }
-
-        .btn-bot {
-            background: linear-gradient(135deg, var(--accent-light), var(--accent-green));
-            color: var(--primary-dark);
-            box-shadow: 0 5px 15px rgba(128, 255, 192, 0.4);
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
-        }
-
-        .btn i {
-            margin-right: 10px;
-            font-size: 1.3rem;
-        }
-
-        /* Launch Date */
-        .launch-date {
-            text-align: center;
-            margin: 3rem 0;
-            padding: 2rem;
-            background: var(--card-bg);
-            border-radius: 15px;
-            border: 1px solid rgba(0, 255, 136, 0.1);
-            animation: fadeIn 1.5s ease;
-        }
-
-        .launch-date h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--accent-light);
-        }
-
-        .date {
-            font-size: 1.5rem;
-            color: var(--accent-green);
-            font-weight: 700;
-        }
-
-        /* Footer */
-        footer {
-            padding: 3rem 0;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 3rem;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .footer-text {
-            color: #888;
-            margin-bottom: 1.5rem;
-        }
-
-        .terms-link {
-            color: var(--accent-green);
-            text-decoration: none;
-            border-bottom: 1px dotted var(--accent-green);
             cursor: pointer;
         }
 
-        /* Modal */
+        .progress {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .time {
+            font-size: 14px;
+            color: var(--text-secondary);
+            min-width: 40px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .volume-control i {
+            margin-right: 10px;
+            color: var(--text-secondary);
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 5px;
+            background-color: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .volume-level {
+            height: 100%;
+            background-color: var(--primary);
+            width: 70%;
+        }
+
+        /* Auth Modals */
         .modal {
             display: none;
             position: fixed;
@@ -264,299 +459,840 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.8);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 20px;
         }
 
         .modal-content {
-            background: var(--secondary-dark);
-            border-radius: 15px;
-            padding: 2rem;
-            max-width: 600px;
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 10px;
             width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 1px solid var(--accent-green);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
-            animation: modalFadeIn 0.5s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header h2 {
-            color: var(--accent-green);
+            max-width: 400px;
+            position: relative;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px var(--primary);
         }
 
         .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
             background: none;
             border: none;
-            color: var(--text-light);
-            font-size: 1.5rem;
+            color: var(--text);
+            font-size: 20px;
             cursor: pointer;
-            transition: color 0.3s ease;
         }
 
-        .close-modal:hover {
-            color: var(--accent-green);
+        .modal h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
         }
 
-        .modal-body {
-            line-height: 1.6;
+        .auth-form .form-group {
+            margin-bottom: 15px;
         }
 
-        .modal-body p {
-            margin-bottom: 1rem;
-        }
-
-        .highlight {
-            color: var(--accent-green);
-            font-weight: 600;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from { 
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(0, 255, 136, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
-        }
-
-        @keyframes modalFadeIn {
-            from { 
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to { 
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        /* Particle Background */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .auth-submit {
             width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
-        .particle {
-            position: absolute;
-            background: var(--accent-green);
-            border-radius: 50%;
-            opacity: 0.3;
+        .auth-submit:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 0 10px var(--primary);
         }
 
-        /* Floating animation for particles */
-        @keyframes float {
-            0% { transform: translateY(0) translateX(0); opacity: 0.3; }
-            25% { transform: translateY(-20px) translateX(10px); opacity: 0.5; }
-            50% { transform: translateY(-40px) translateX(0); opacity: 0.3; }
-            75% { transform: translateY(-20px) translateX(-10px); opacity: 0.5; }
-            100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--text-secondary);
+        }
+
+        .auth-switch a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Terms Modal */
+        .terms-content {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .terms-content h3 {
+            margin: 15px 0 10px;
+            color: var(--primary);
+        }
+
+        .terms-content p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(10, 10, 10, 0.9);
+            padding: 30px 0;
+            border-top: 1px solid var(--primary);
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .terms-link {
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin: 15px 0;
+            }
+
+            .auth-buttons {
+                margin-top: 10px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                margin-top: 15px;
+            }
+
+            .footer-links a {
+                margin: 0 10px;
+            }
+
+            .player-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .player-info {
+                margin-bottom: 10px;
+            }
+
+            .player-controls {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .volume-control {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Particle Background -->
-    <div class="particles" id="particles"></div>
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
 
-    <div class="container">
-        <header>
-            <div class="logo-container">
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-bolt"></i>
+                    <i class="fas fa-music"></i> EnergyMusic
                 </div>
-                <div class="logo-text">EnergyClicker</div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active">Главная</a></li>
+                        <li><a href="#music">Музыка</a></li>
+                        <li><a href="#upload">Загрузить</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                    <button id="login-btn">Вход</button>
+                    <button id="register-btn">Регистрация</button>
+                </div>
             </div>
-            <div class="subtitle">Инновационный кликер бот для Telegram</div>
-        </header>
+        </div>
+    </header>
 
-        <section class="hero">
-            <h1>Зарабатывайте энергию просто кликая!</h1>
-            <p>EnergyClicker - это уникальный бот, который позволяет вам зарабатывать виртуальную энергию простыми кликами. Участвуйте в развитии проекта и получайте вознаграждения!</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Делитесь своей музыкой с миром</h1>
+            <p>EnergyMusic - это платформа для музыкантов, где вы можете загружать свои треки, находить слушателей и получать обратную связь от сообщества.</p>
+            <button class="cta-button" id="hero-upload-btn">Загрузить трек</button>
+        </div>
+    </section>
+
+    <!-- Music Section -->
+    <section class="music-section" id="music">
+        <div class="container">
+            <h2 class="section-title">Последние загрузки</h2>
             
-            <div class="buttons">
-                <a href="https://t.me/EnergyClick" class="btn btn-telegram" target="_blank">
-                    <i class="fab fa-telegram"></i> Наш канал
-                </a>
-                <a href="https://t.me/EnergyClickBot" class="btn btn-bot" target="_blank">
-                    <i class="fas fa-robot"></i> Начать играть
-                </a>
-            </div>
-        </section>
-
-        <section class="features">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-mouse-pointer"></i>
-                </div>
-                <h3>Простой кликер</h3>
-                <p>Просто кликайте и зарабатывайте энергию. Легкий и интуитивно понятный интерфейс.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3>Развитие</h3>
-                <p>Прокачивайте свои способности и увеличивайте доход от каждого клика.</p>
+            <!-- Upload Form (visible when logged in) -->
+            <div class="upload-form" id="upload-form" style="display: none;">
+                <h3>Загрузить новый трек</h3>
+                <form id="music-upload-form">
+                    <div class="form-group">
+                        <label for="song-title">Название трека</label>
+                        <input type="text" id="song-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="song-artist">Исполнитель</label>
+                        <input type="text" id="song-artist" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="song-file">MP3 файл</label>
+                        <input type="file" id="song-file" accept=".mp3" required>
+                    </div>
+                    <button type="submit" class="upload-button">Загрузить</button>
+                </form>
             </div>
             
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-users"></i>
+            <!-- Music Grid -->
+            <div class="music-grid" id="music-grid">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Загрузка музыки...
                 </div>
-                <h3>Сообщество</h3>
-                <p>Присоединяйтесь к нашему растущему сообществу и соревнуйтесь с другими игроками.</p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="launch-date">
-            <h2>Дата открытия кликера</h2>
-            <div class="date">25 октября 2025 года</div>
-        </section>
-
-        <footer>
-            <div class="footer-logo">
-                <div class="logo-text">LitEnergy</div>
+    <!-- Audio Player -->
+    <div class="audio-player" id="audio-player">
+        <div class="player-content">
+            <div class="player-info">
+                <div class="player-cover">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="player-text">
+                    <h4 id="player-title">Название трека</h4>
+                    <p id="player-artist">Исполнитель</p>
+                </div>
             </div>
-            <div class="footer-text">
-                © 2025 EnergyClicker от компании LitEnergy. <span class="terms-link" id="open-terms">Пользовательское соглашение</span>
+            <div class="player-controls">
+                <button id="prev-btn"><i class="fas fa-step-backward"></i></button>
+                <button id="play-pause-btn" class="play-pause-btn"><i class="fas fa-play"></i></button>
+                <button id="next-btn"><i class="fas fa-step-forward"></i></button>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                </div>
+                <span class="time" id="current-time">0:00</span>
+                <span class="time">/</span>
+                <span class="time" id="duration">0:00</span>
             </div>
-            <div class="footer-text">
-                Все права на бота принадлежат компании LitEnergy.
-            </div>
-        </footer>
-    </div>
-
-    <!-- Modal for Terms -->
-    <div class="modal" id="terms-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Пользовательское соглашение</h2>
-                <button class="close-modal" id="close-terms">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Настоящим пользовательским соглашением регулируется использование бота EnergyClicker в мессенджере Telegram.</p>
-                
-                <p><span class="highlight">1. Общие положения</span><br>
-                EnergyClicker - это игра-кликер, разработанная компанией LitEnergy. Используя бота, вы соглашаетесь с условиями данного соглашения.</p>
-                
-                <p><span class="highlight">2. Виртуальная валюта</span><br>
-                EnergyClicker использует виртуальную валюту "Энергия", которая не имеет реальной денежной стоимости. Компания LitEnergy не гарантирует, что данная валюта когда-либо станет настоящей или будет конвертирована в реальные деньги.</p>
-                
-                <p><span class="highlight">3. Отказ от ответственности</span><br>
-                Компания LitEnergy не несет ответственности за любые убытки, прямые или косвенные, возникшие в результате использования или невозможности использования бота EnergyClicker.</p>
-                
-                <p><span class="highlight">4. Изменения в соглашении</span><br>
-                Мы оставляем за собой право вносить изменения в настоящее пользовательское соглашение в любое время без предварительного уведомления.</p>
-                
-                <p><span class="highlight">5. Права интеллектуальной собственности</span><br>
-                Все права на бота EnergyClicker, его концепцию, дизайн и функционал принадлежат компании LitEnergy. Однако мы не гарантируем полную защиту интеллектуальной собственности от возможных нарушений.</p>
-                
-                <p><span class="highlight">6. Ограничения</span><br>
-                Запрещается использование любых автоматизированных средств для взаимодействия с ботом, а также любые попытки взлома или нарушения работы бота.</p>
-                
-                <p>Используя EnergyClicker, вы подтверждаете, что ознакомились и согласны с условиями данного пользовательского соглашения.</p>
+            <div class="volume-control">
+                <i class="fas fa-volume-up"></i>
+                <div class="volume-slider" id="volume-slider">
+                    <div class="volume-level" id="volume-level"></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">
+                    <i class="fas fa-music"></i> EnergyMusic
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="terms-link" id="footer-terms-link">Пользовательское соглашение</a>
+                    <a href="#">О нас</a>
+                    <a href="#">Контакты</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2>Вход в аккаунт</h2>
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="auth-submit">Войти</button>
+            </form>
+            <div class="auth-switch">
+                Нет аккаунта? <a href="#" id="switch-to-register">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2>Регистрация</h2>
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Имя пользователя</label>
+                    <input type="text" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Пароль</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <button type="submit" class="auth-submit">Зарегистрироваться</button>
+            </form>
+            <div class="auth-switch">
+                Уже есть аккаунт? <a href="#" id="switch-to-login">Войти</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal" id="terms-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2>Пользовательское соглашение</h2>
+            <div class="terms-content">
+                <h3>1. Общие положения</h3>
+                <p>1.1. Настоящее Пользовательское соглашение (далее — Соглашение) регулирует отношения между Администрацией сайта EnergyMusic (далее — Администрация) и Пользователем (далее — Пользователь) по использованию сайта EnergyMusic.</p>
+                
+                <h3>2. Права и обязанности сторон</h3>
+                <p>2.1. Пользователь имеет право загружать музыкальные произведения в формате MP3 при условии, что он является автором или обладает необходимыми правами на распространение данных произведений.</p>
+                <p>2.2. Пользователь обязуется не нарушать авторские права третьих лиц при загрузке контента на сайт.</p>
+                
+                <h3>3. Контент Пользователя</h3>
+                <p>3.1. Загружая контент на сайт, Пользователь предоставляет Администрации неисключительную лицензию на использование, хранение и отображение данного контента в рамках функционала сайта.</p>
+                
+                <h3>4. Ответственность</h3>
+                <p>4.1. Администрация не несет ответственности за контент, загруженный Пользователями, однако оставляет за собой право удалять материалы, нарушающие законодательство или настоящее Соглашение.</p>
+                
+                <h3>5. Изменения в Соглашении</h3>
+                <p>5.1. Администрация оставляет за собой право вносить изменения в настоящее Соглашение в любое время. Новая редакция Соглашения вступает в силу с момента ее размещения на сайте.</p>
+                
+                <p>Дата последнего обновления: 1 января 2025 года</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // Particles background
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 50;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                const size = Math.random() * 5 + 2;
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                const delay = Math.random() * 10;
-                const duration = Math.random() * 20 + 10;
-                
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${posX}%`;
-                particle.style.top = `${posY}%`;
-                particle.style.animation = `float ${duration}s linear ${delay}s infinite`;
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
+        // Firebase configuration - ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwYYkJHxrxJVX3cI903Zzw9--E1GSDxvk",
+            authDomain: "musictosha-c5031.firebaseapp.com",
+            projectId: "musictosha-c5031",
+            storageBucket: "musictosha-c5031.firebasestorage.app",
+            messagingSenderId: "683574589349",
+            appId: "1:683574589349:web:d14dc7c200edf3bff09a4c"
+        };
 
-        // Modal functionality
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Initialize particles background
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize particles
-            createParticles();
-            
-            // Modal events
-            document.getElementById('open-terms').addEventListener('click', function() {
-                document.getElementById('terms-modal').style.display = 'flex';
-            });
-
-            document.getElementById('close-terms').addEventListener('click', function() {
-                document.getElementById('terms-modal').style.display = 'none';
-            });
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                const modal = document.getElementById('terms-modal');
-                if (event.target === modal) {
-                    modal.style.display = 'none';
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: "#00ff88" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.5, random: true },
+                    size: { value: 3, random: true },
+                    line_linked: { enable: true, distance: 150, color: "#00ff88", opacity: 0.4, width: 1 },
+                    move: { enable: true, speed: 2, direction: "none", random: true, straight: false, out_mode: "out" }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: { enable: true, mode: "repulse" },
+                        onclick: { enable: true, mode: "push" }
+                    }
                 }
             });
         });
 
-        // Fallback in case DOMContentLoaded doesn't fire
-        window.addEventListener('load', function() {
-            if (!document.querySelector('.particle')) {
-                createParticles();
+        // Modal functionality
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const loginModal = document.getElementById('login-modal');
+        const registerModal = document.getElementById('register-modal');
+        const termsModal = document.getElementById('terms-modal');
+        const closeButtons = document.querySelectorAll('.close-modal');
+        const switchToRegister = document.getElementById('switch-to-register');
+        const switchToLogin = document.getElementById('switch-to-login');
+        const footerTermsLink = document.getElementById('footer-terms-link');
+        const heroUploadBtn = document.getElementById('hero-upload-btn');
+        const uploadForm = document.getElementById('upload-form');
+
+        // Show modals
+        loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
+        registerBtn.addEventListener('click', () => registerModal.style.display = 'flex');
+        footerTermsLink.addEventListener('click', () => termsModal.style.display = 'flex');
+        heroUploadBtn.addEventListener('click', () => {
+            if (isLoggedIn()) {
+                uploadForm.style.display = 'block';
+                window.scrollTo({ top: uploadForm.offsetTop - 100, behavior: 'smooth' });
+            } else {
+                loginModal.style.display = 'flex';
             }
         });
+
+        // Close modals
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                loginModal.style.display = 'none';
+                registerModal.style.display = 'none';
+                termsModal.style.display = 'none';
+            });
+        });
+
+        // Switch between login and register modals
+        switchToRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.style.display = 'none';
+            registerModal.style.display = 'flex';
+        });
+
+        switchToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) loginModal.style.display = 'none';
+            if (e.target === registerModal) registerModal.style.display = 'none';
+            if (e.target === termsModal) termsModal.style.display = 'none';
+        });
+
+        // Audio player functionality
+        const audioPlayer = document.getElementById('audio-player');
+        const playerTitle = document.getElementById('player-title');
+        const playerArtist = document.getElementById('player-artist');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeLevel = document.getElementById('volume-level');
+
+        let currentAudio = new Audio();
+        let isPlaying = false;
+        let currentSongIndex = 0;
+        let songs = [];
+
+        // Format time
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const { duration, currentTime } = currentAudio;
+            const progressPercent = (currentTime / duration) * 100;
+            progress.style.width = `${progressPercent}%`;
+            currentTimeEl.textContent = formatTime(currentTime);
+        }
+
+        // Set progress
+        function setProgress(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = currentAudio.duration;
+            
+            currentAudio.currentTime = (clickX / width) * duration;
+        }
+
+        // Play song
+        function playSong(song) {
+            if (!song || !song.audioUrl) return;
+            
+            playerTitle.textContent = song.title;
+            playerArtist.textContent = song.artist;
+            currentAudio.src = song.audioUrl;
+            
+            currentAudio.play().then(() => {
+                isPlaying = true;
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                audioPlayer.style.display = 'block';
+            }).catch(error => {
+                console.error('Error playing audio:', error);
+            });
+        }
+
+        // Toggle play/pause
+        function togglePlayPause() {
+            if (isPlaying) {
+                currentAudio.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            } else {
+                currentAudio.play().then(() => {
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                });
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Set volume
+        function setVolume(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const volume = clickX / width;
+            
+            currentAudio.volume = volume;
+            volumeLevel.style.width = `${volume * 100}%`;
+        }
+
+        // Event listeners for audio player
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        
+        currentAudio.addEventListener('timeupdate', updateProgress);
+        currentAudio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(currentAudio.duration);
+        });
+        currentAudio.addEventListener('ended', () => {
+            isPlaying = false;
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+        
+        progressBar.addEventListener('click', setProgress);
+        volumeSlider.addEventListener('click', setVolume);
+
+        // User authentication with Firebase
+        function isLoggedIn() {
+            return auth.currentUser !== null;
+        }
+
+        function getCurrentUser() {
+            return auth.currentUser;
+        }
+
+        // Auth state observer
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                updateUIForLoggedInUser(user);
+            } else {
+                // User is signed out
+                updateUIForLoggedOutUser();
+            }
+        });
+
+        // Login form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed in
+                    loginModal.style.display = 'none';
+                    alert(`Добро пожаловать, ${userCredential.user.email}!`);
+                })
+                .catch((error) => {
+                    alert(`Ошибка входа: ${error.message}`);
+                });
+        });
+
+        // Register form submission
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed in
+                    const user = userCredential.user;
+                    
+                    // Save additional user data to Firestore
+                    return db.collection('users').doc(user.uid).set({
+                        username: username,
+                        email: email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    registerModal.style.display = 'none';
+                    alert(`Регистрация прошла успешно! Добро пожаловать!`);
+                })
+                .catch((error) => {
+                    alert(`Ошибка регистрации: ${error.message}`);
+                });
+        });
+
+        // Update UI based on login status
+        function updateUIForLoggedInUser(user) {
+            document.querySelector('.auth-buttons').innerHTML = `
+                <span>Привет, ${user.email}</span>
+                <button id="logout-btn">Выйти</button>
+            `;
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            uploadForm.style.display = 'block';
+        }
+
+        function updateUIForLoggedOutUser() {
+            document.querySelector('.auth-buttons').innerHTML = `
+                <button id="login-btn">Вход</button>
+                <button id="register-btn">Регистрация</button>
+            `;
+            // Reattach event listeners to the new buttons
+            document.getElementById('login-btn').addEventListener('click', () => loginModal.style.display = 'flex');
+            document.getElementById('register-btn').addEventListener('click', () => registerModal.style.display = 'flex');
+            uploadForm.style.display = 'none';
+        }
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                alert('Вы вышли из системы');
+            }).catch((error) => {
+                alert(`Ошибка выхода: ${error.message}`);
+            });
+        }
+
+        // Music upload functionality
+        document.getElementById('music-upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!isLoggedIn()) {
+                alert('Пожалуйста, войдите в систему для загрузки музыки');
+                return;
+            }
+            
+            const title = document.getElementById('song-title').value;
+            const artist = document.getElementById('song-artist').value;
+            const fileInput = document.getElementById('song-file');
+            
+            if (!fileInput.files.length) {
+                alert('Пожалуйста, выберите MP3 файл');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const user = getCurrentUser();
+            
+            // Create a unique ID for the song
+            const songId = Date.now().toString();
+            
+            // Upload file to Firebase Storage
+            const storageRef = storage.ref();
+            const songRef = storageRef.child(`songs/${songId}_${file.name}`);
+            
+            songRef.put(file).then((snapshot) => {
+                // Get the download URL
+                return snapshot.ref.getDownloadURL();
+            }).then((downloadURL) => {
+                // Save song metadata to Firestore
+                return db.collection('songs').doc(songId).set({
+                    id: songId,
+                    title: title,
+                    artist: artist,
+                    uploader: user.uid,
+                    uploaderEmail: user.email,
+                    audioUrl: downloadURL,
+                    likes: 0,
+                    likedBy: [],
+                    uploadDate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }).then(() => {
+                // Reset form
+                document.getElementById('music-upload-form').reset();
+                
+                // Update music grid
+                renderMusicGrid();
+                
+                alert('Трек успешно загружен!');
+            }).catch((error) => {
+                console.error('Error uploading song:', error);
+                alert('Ошибка при загрузке трека: ' + error.message);
+            });
+        });
+
+        // Render music grid
+        function renderMusicGrid() {
+            const musicGrid = document.getElementById('music-grid');
+            
+            musicGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Загрузка музыки...</div>';
+            
+            // Get songs from Firestore
+            db.collection('songs')
+                .orderBy('uploadDate', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    songs = [];
+                    musicGrid.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        musicGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">Пока нет загруженных треков. Будьте первым!</p>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const song = doc.data();
+                        songs.push(song);
+                        
+                        const isLiked = song.likedBy && song.likedBy.includes(auth.currentUser ? auth.currentUser.uid : '');
+                        
+                        const musicCard = document.createElement('div');
+                        musicCard.className = 'music-card';
+                        musicCard.innerHTML = `
+                            <div class="music-cover">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="music-info">
+                                <div class="music-title">${song.title}</div>
+                                <div class="music-artist">${song.artist}</div>
+                                <div class="music-uploader">Загрузил: ${song.uploaderEmail}</div>
+                                <div class="music-controls">
+                                    <button class="play-button" data-song-index="${songs.length - 1}">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="like-button ${isLiked ? 'liked' : ''}" data-song-id="${song.id}">
+                                        <i class="fas fa-heart"></i>
+                                        <span class="likes-count">${song.likes || 0}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        musicGrid.appendChild(musicCard);
+                    });
+                    
+                    // Add event listeners to play buttons
+                    document.querySelectorAll('.play-button').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const songIndex = parseInt(this.getAttribute('data-song-index'));
+                            playSong(songs[songIndex]);
+                            currentSongIndex = songIndex;
+                        });
+                    });
+                    
+                    // Add event listeners to like buttons
+                    document.querySelectorAll('.like-button').forEach(button => {
+                        button.addEventListener('click', function() {
+                            if (!isLoggedIn()) {
+                                alert('Пожалуйста, войдите в систему, чтобы ставить лайки');
+                                return;
+                            }
+                            
+                            const songId = this.getAttribute('data-song-id');
+                            const songRef = db.collection('songs').doc(songId);
+                            
+                            songRef.get().then((doc) => {
+                                if (doc.exists) {
+                                    const song = doc.data();
+                                    const currentUser = getCurrentUser();
+                                    
+                                    if (!song.likedBy) {
+                                        song.likedBy = [];
+                                    }
+                                    
+                                    const userIndex = song.likedBy.indexOf(currentUser.uid);
+                                    
+                                    if (userIndex === -1) {
+                                        // Like the song
+                                        song.likedBy.push(currentUser.uid);
+                                        song.likes = (song.likes || 0) + 1;
+                                        this.classList.add('liked');
+                                    } else {
+                                        // Unlike the song
+                                        song.likedBy.splice(userIndex, 1);
+                                        song.likes = (song.likes || 0) - 1;
+                                        this.classList.remove('liked');
+                                    }
+                                    
+                                    // Update likes count
+                                    this.querySelector('.likes-count').textContent = song.likes;
+                                    
+                                    // Save changes to Firestore
+                                    return songRef.update({
+                                        likes: song.likes,
+                                        likedBy: song.likedBy
+                                    });
+                                }
+                            }).catch((error) => {
+                                console.error('Error updating like:', error);
+                            });
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error getting songs:', error);
+                    musicGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">Ошибка загрузки музыки</p>';
+                });
+        }
+
+        // Initialize the app
+        updateUIForLoggedOutUser();
+        renderMusicGrid();
     </script>
 </body>
 </html>
